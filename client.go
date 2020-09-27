@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
 	"os"
 	"time"
 
@@ -61,6 +62,7 @@ func (c *Client) Initialize(configPath string, pierID string, extra []byte) erro
 
 func (c *Client) Start() error {
 	logger.Info("config is ", c.config.Fake)
+
 	go func(ctx context.Context) {
 		if c.config.Fake.Tps == 0 {
 			return
@@ -70,14 +72,15 @@ func (c *Client) Start() error {
 		defer ticker.Stop()
 
 		i := uint64(1)
-
 		for {
 			select {
 			case <-ticker.C:
 				for j := uint64(0); j < uint64(c.config.Fake.Tps); j++ {
-					c.eventC <- mockIBTP(i, c.pierID, c.config.Fake.To, c.proof)
+					ibtp := mockIBTP(i, c.pierID, c.config.Fake.To, c.proof)
+					c.eventC <- ibtp
 					i++
 				}
+				logger.Info("send ibtp counter:", i)
 			case <-ctx.Done():
 				close(c.eventC)
 				return
@@ -194,8 +197,15 @@ func main() {
 		},
 		Logger: logger,
 		// A non-nil value here enables gRPC serving for this plugin...
-		GRPCServer: plugin.DefaultGRPCServer,
+		GRPCServer: DefaultGRPCServer,
 	})
 
 	logger.Info("Plugin server down")
+}
+
+func DefaultGRPCServer(opts []grpc.ServerOption) *grpc.Server {
+	opts = append(opts, grpc.MaxConcurrentStreams(1000),
+		grpc.InitialWindowSize(10*1024*1024),
+		grpc.InitialConnWindowSize(100*1024*1024))
+	return grpc.NewServer(opts...)
 }
