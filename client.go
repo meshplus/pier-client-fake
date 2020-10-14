@@ -205,6 +205,7 @@ func main() {
 
 func DefaultGRPCServer(opts []grpc.ServerOption) *grpc.Server {
 	opts = append(opts, grpc.MaxConcurrentStreams(1000),
+		grpc.MaxRecvMsgSize(100*1024*1024),
 		grpc.InitialWindowSize(10*1024*1024),
 		grpc.InitialConnWindowSize(100*1024*1024))
 	return grpc.NewServer(opts...)
