@@ -23,6 +23,7 @@ type Client struct {
 	proof  []byte
 }
 
+
 var (
 	_      plugins.Client = (*Client)(nil)
 	logger                = hclog.New(&hclog.LoggerOptions{
@@ -188,6 +189,12 @@ func (c *Client) GetCallbackMeta() (map[string]uint64, error) {
 func (c *Client) CommitCallback(ibtp *pb.IBTP) error {
 	return nil
 }
+
+func (c *Client) GetReceipt(ibtp *pb.IBTP) (*pb.IBTP, error) {
+	return nil, fmt.Errorf("not found")
+}
+
+
 
 func main() {
 	plugin.Serve(&plugin.ServeConfig{
