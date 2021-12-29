@@ -1,5 +1,6 @@
 .DS_Store
 .idea
+.idea/*
 *.tar
 logs/*
 internal/repo/a_repo-packr.go
@@ -10,3 +11,4 @@ coverage.txt
 cover.html
 
 testdata/
+bulid/*
